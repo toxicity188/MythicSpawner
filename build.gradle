@@ -15,10 +15,18 @@ repositories {
         name = "sonatype"
         url = "https://oss.sonatype.org/content/groups/public/"
     }
+    maven {
+        url = 'https://mvn.lumine.io/repository/maven-public/'
+    }
+    maven {
+        url = 'https://jitpack.io/'
+    }
 }
 
 dependencies {
-compileOnly "io.papermc.paper:paper-api:1.19.4-R0.1-SNAPSHOT"
+    compileOnly "io.papermc.paper:paper-api:1.19.4-R0.1-SNAPSHOT"
+    compileOnly 'io.lumine:Mythic-Dist:5.3.5'
+    compileOnly 'com.github.toxicity188:ToxicityLibs:master-SNAPSHOT'
 }
 
 def targetJavaVersion = 17

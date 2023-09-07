@@ -1,4 +1,14 @@
 name: MythicSpawner
+author: toxicity
 version: '${version}'
 main: kor.toxicity.mythicspawner.MythicSpawner
 api-version: '1.19'
+softdepend:
+  - ToxicityLibs
+  - MythicMobs
+commands:
+  mythicmobsspawner:
+    aliases:
+      - mms
+    description: MythicSpawner's command.
+    usage: /<command>
