@@ -1,0 +1,4 @@
+name: MythicSpawner
+version: '${version}'
+main: kor.toxicity.mythicspawner.MythicSpawner
+api-version: '1.19'
