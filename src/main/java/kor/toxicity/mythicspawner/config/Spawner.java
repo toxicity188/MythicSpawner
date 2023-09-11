@@ -8,6 +8,8 @@ import io.lumine.mythic.core.spawning.spawners.SpawnerManager;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -15,20 +17,23 @@ import java.util.*;
 import static kor.toxicity.mythicspawner.MythicSpawner.*;
 
 public class Spawner {
-    private final MythicBukkit bukkit = MythicBukkit.inst();
     private final HashedSpawner mythicSpawner;
     private final long regenTime;
     private final Map<Long,Announce> announceMap = new HashMap<>();
     private boolean spawned = false;
     private long regenLeft;
     private Announce deathAnnounce;
-    public Spawner(ConfigurationSection section) {
+    private final Plugin plugin;
+    private BukkitTask task;
+    public Spawner(Plugin plugin, ConfigurationSection section) {
+        this.plugin = plugin;
         var name = Objects.requireNonNull(section.getString("name"),"The key \"name\" does not exist.");
+        MythicBukkit bukkit = MythicBukkit.inst();
         bukkit.getMobManager().getMythicMob(name).orElseThrow(() -> new RuntimeException("The mob \"" + name + "\" doesn't exist."));
         var location = Objects.requireNonNull(section.getConfigurationSection("location"), "The key \"location\" does not exist.");
         var worldName = Objects.requireNonNull(location.getString("world"), "The key \"world\" does not exist in location.");
         var world = Objects.requireNonNull(Bukkit.getWorld(worldName), "The world \"" + worldName + "\" doesn't exist.");
-        var spawnerName = Optional.ofNullable(section.getString("spawner-name")).orElse(new String(Base64.getEncoder().encode(name.getBytes(StandardCharsets.UTF_8))));
+        var spawnerName = "Temp#" + Optional.ofNullable(section.getString("spawner-name")).orElse(new String(Base64.getEncoder().encode(name.getBytes(StandardCharsets.UTF_8))));
         mythicSpawner = new HashedSpawner(
                 bukkit.getSpawnerManager(),
                 spawnerName,
@@ -71,7 +76,6 @@ public class Spawner {
                 warn("Reason: " + (msg != null ? msg : "unknown"));
             }
         }
-        bukkit.getSpawnerManager().listSpawners.remove(mythicSpawner);
     }
     public String getName() {
         return mythicSpawner.getName();
@@ -90,14 +94,14 @@ public class Spawner {
         regenLeft--;
         if (regenLeft == 0) {
             spawned = true;
-            bukkit.getSpawnerManager().listSpawners.add(mythicSpawner);
+            task = Bukkit.getScheduler().runTaskTimer(plugin, mythicSpawner::tickSpawnerClock, 20, 20);
         }
         return announceMap.get(regenLeft);
     }
     public void initialize() {
         spawned = false;
         regenLeft = regenTime;
-        bukkit.getSpawnerManager().listSpawners.remove(mythicSpawner);
+        if (task != null) task.cancel();
     }
 
     public boolean isSpawned() {

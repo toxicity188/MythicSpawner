@@ -105,7 +105,7 @@ public class ConfigManager implements MythicSpawnerManager {
             var config = s.getConfigurationSection(k);
             if (config != null) {
                 try {
-                    var spawner1 = new Spawner(config);
+                    var spawner1 = new Spawner(spawner,config);
                     SPAWNERS.put(spawner1.getName(),spawner1);
                 } catch (Exception e) {
                     var msg = e.getMessage();
